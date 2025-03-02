@@ -1,4 +1,4 @@
-data/
+resources/data/*.pdf
 
 target/
 !.mvn/wrapper/maven-wrapper.jar
