@@ -3,7 +3,7 @@ package com.example.pgvectorrag.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
@@ -117,12 +117,12 @@ public class RagService {
                         SearchRequest.builder().similarityThreshold(0.8d).topK(6).build());
 
         ChatMemory chatMemory = new InMemoryChatMemory();
-        MessageChatMemoryAdvisor messageChatMemoryAdvisor = new MessageChatMemoryAdvisor(chatMemory);
+        PromptChatMemoryAdvisor memoryAdvisor = new PromptChatMemoryAdvisor(chatMemory);
 
         return ChatClient.builder(chatModel)
                 .build()
                 .prompt()
-                .advisors(messageChatMemoryAdvisor, questionAnswerAdvisor)
+                .advisors(memoryAdvisor, questionAnswerAdvisor)
                 .user(question)
                 .call()
                 .content();

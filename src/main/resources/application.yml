@@ -10,12 +10,12 @@ spring:
         max-document-batch-size: 10000 # Optional: Maximum number of documents per batch
     ollama:
       chat:
-        model: llama3.3
+        #model: llama3.3
         #model: llama3.1
         #model: llama3
         #model: deepseek-r1
         #model: phi3
-        #model: wizardlm2:7b
+        model: wizardlm2:7b
         embedding:
           model: mxbai-embed-large
         init:
@@ -29,4 +29,4 @@ spring:
 
 application:
   aiapp:
-    docToLoadDb: classpath:/data/const_ind.pdf
+    docToLoadDb: classpath:/data/constitution_of_india.pdf
