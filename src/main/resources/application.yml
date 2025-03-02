@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: pgvector-rag
+  ai:
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1024
+        max-document-batch-size: 10000 # Optional: Maximum number of documents per batch
+    ollama:
+      chat:
+        model: llama3.3
+        #model: llama3.1
+        #model: llama3
+        #model: deepseek-r1
+        #model: phi3
+        #model: wizardlm2:7b
+        embedding:
+          model: mxbai-embed-large
+        init:
+          pull-model-strategy: when_missing
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+
+application:
+  aiapp:
+    docToLoadDb: classpath:/data/const_ind.pdf
