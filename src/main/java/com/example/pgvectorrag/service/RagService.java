@@ -1,6 +1,5 @@
 package com.example.pgvectorrag.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
@@ -25,11 +24,26 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Slf4j
 public class RagService {
-    private final ChatModel chatModel;
+    private final ChatModel chatModel; // without advisors
+    private final ChatClient chatClient; // used for advisors
     private final VectorStore vectorStore;
+
+    public RagService(ChatModel chatModel, ChatClient.Builder chatClientBuilder, VectorStore vectorStore) {
+        this.chatModel = chatModel;
+        QuestionAnswerAdvisor questionAnswerAdvisor =
+                new QuestionAnswerAdvisor(vectorStore,
+                        SearchRequest.builder().similarityThreshold(0.8d).topK(6).build());
+
+        ChatMemory chatMemory = new InMemoryChatMemory();
+        PromptChatMemoryAdvisor memoryAdvisor = new PromptChatMemoryAdvisor(chatMemory);
+        this.chatClient = chatClientBuilder
+                .defaultAdvisors(memoryAdvisor, questionAnswerAdvisor)
+                .build();
+        this.vectorStore = vectorStore;
+    }
 
 
     public String getResponse(String question) {
@@ -60,6 +74,7 @@ public class RagService {
         long startTime = System.currentTimeMillis();
         ChatResponse response = chatModel
                 .call(new Prompt(List.of(userMessage)));
+
         long endTime = System.currentTimeMillis();
         long timeTaken = endTime - startTime;
         // to seconds
@@ -78,13 +93,14 @@ public class RagService {
                 new QuestionAnswerAdvisor(vectorStore,
                         SearchRequest.builder().similarityThreshold(0.8d).topK(6).build());
 
-        return ChatClient.builder(chatModel)
-                .build()
+        String content = chatClient
                 .prompt()
                 .advisors(questionAnswerAdvisor)
                 .user(question)
                 .call()
                 .content();
+        log.info("answer: {}", content);
+        return content;
 
     }
 
@@ -100,32 +116,26 @@ public class RagService {
                         .build())
                 .build();
 
-        return ChatClient.builder(chatModel)
-                .build()
+        String content = chatClient
                 .prompt()
                 .advisors(retrievalAugmentationAdvisor)
                 .user(question)
                 .call()
                 .content();
+        log.info("answer: {}", content);
+        return content;
 
     }
 
     public String getResponseUsingMemory(String question) {
         log.info("Getting answer using getResponseUsingRAGAdvisor : {}", question);
-        QuestionAnswerAdvisor questionAnswerAdvisor =
-                new QuestionAnswerAdvisor(vectorStore,
-                        SearchRequest.builder().similarityThreshold(0.8d).topK(6).build());
-
-        ChatMemory chatMemory = new InMemoryChatMemory();
-        PromptChatMemoryAdvisor memoryAdvisor = new PromptChatMemoryAdvisor(chatMemory);
-
-        return ChatClient.builder(chatModel)
-                .build()
-                .prompt()
-                .advisors(memoryAdvisor, questionAnswerAdvisor)
+        ChatClient.ChatClientRequestSpec prompt = chatClient.prompt();
+        String content = prompt
                 .user(question)
                 .call()
                 .content();
+        log.info("answer: {}", content);
+        return content;
 
     }
 }
