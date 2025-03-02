@@ -66,3 +66,5 @@ GET http://localhost:8080/api/v1/rag/ask/ragadvisor?question=what amounts to mis
 
 - https://github.com/YugabyteDB-Samples/openai-pgvector-lodging-service
 - https://www.youtube.com/watch?v=ctsGQ3lhcYA
+- https://www.youtube.com/watch?v=rzLKDppAsA4
+- 
